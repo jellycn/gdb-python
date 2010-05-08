@@ -382,6 +382,39 @@ bppy_get_location (PyObject *self, void *closure)
   return PyString_Decode (str, strlen (str), host_charset (), NULL);
 }
 
+/* Python function to get the filename of a breakpoint. */
+static PyObject *
+bppy_get_filename (PyObject *self, void *closure)
+{
+  char *str;
+  breakpoint_object *obj = (breakpoint_object *) self;
+
+  BPPY_REQUIRE_VALID (obj);
+
+  if (obj->bp->type != bp_breakpoint)
+    Py_RETURN_NONE;
+
+  str = obj->bp->source_file;
+
+  if (! str)
+    str = "";
+  return PyString_Decode(str, strlen(str), host_charset (), NULL);
+}
+
+/* Python function to get the breakpoint line number */
+static PyObject *
+bppy_get_line (PyObject *self, void *closure)
+{
+  breakpoint_object *obj = (breakpoint_object *) self;
+
+  BPPY_REQUIRE_VALID (obj);
+
+  if (obj->bp->type != bp_breakpoint)
+    Py_RETURN_NONE;
+
+  return PyLong_FromUnsignedLongLong (obj->bp->line_number);
+}
+
 /* Python function to get the breakpoint expression.  */
 static PyObject *
 bppy_get_expression (PyObject *self, void *closure)
@@ -816,6 +849,10 @@ or None if no condition set."},
     "Commands of the breakpoint, as specified by the user."},
   { "type", bppy_get_type, NULL,
     "Type of breakpoint."},
+  { "filename", bppy_get_filename, NULL,
+    "Filename of the breakpoint, as specified by the user."},
+  { "line", bppy_get_line, NULL,
+    "Line number of the breakpoint, as specified by the user."},
   { NULL }  /* Sentinel.  */
 };
 
